@@ -17,17 +17,22 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Set up Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.4.6  # Specify the version of Terraform you want to use
+    - name: Download and Unzip Terraform
+      run: |
+        curl -LO "https://releases.hashicorp.com/terraform/1.4.6/terraform_1.4.6_linux_amd64.zip"
+        unzip terraform_1.4.6_linux_amd64.zip
+        sudo mv terraform /usr/local/bin/
+
+    - name: Verify Terraform Installation
+      run: terraform version
+
+    - name: Download and Unzip AWS CLI
+      run: |
+        curl "https://d1uj6qtbmh3dt5.cloudfront.net/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+        unzip awscliv2.zip
 
     - name: Install AWS CLI
       run: |
-        sudo apt-get update
-        sudo apt-get install -y unzip
-        curl "https://d1uj6qtbmh3dt5.cloudfront.net/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-        unzip awscliv2.zip
         sudo ./aws/install
         aws --version
 
@@ -46,9 +51,13 @@ jobs:
     - name: Terraform Apply
       run: terraform apply -auto-approve
 
-    - name: Install Nginx
+    - name: Download and Install Nginx
       run: |
         sudo apt-get update
         sudo apt-get install -y nginx
         sudo systemctl start nginx
         sudo systemctl enable nginx
+
+    - name: Verify Nginx Installation
+      run: |
+        curl -I http://localhost
